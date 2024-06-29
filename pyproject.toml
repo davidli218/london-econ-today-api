@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "london-econ-today"
+description = "A restful API for London economic data"
+dependencies = [
+    "flask",
+    "flask-sqlalchemy",
+    "flask-smorest",
+    "flask-jwt-extended",
+    "argon2-cffi",
+    "pandas",
+    "openpyxl",
+]
+requires-python = ">=3.11"
+authors = [
+    { name = "Teii Ri", email = "teiiri@outlook.com" }
+]
+readme = "README.md"
+keywords = ["flask", "restful", "api", "london", "economics"]
+classifiers = [
+    "Framework :: Flask",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "app.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["app"]
+exclude = ["tests"]
+namespaces = false # Disabling scanning for PEP 420 namespace packages
+
+[tool.pytest.ini_options]
+addopts = "--cov -q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+exclude_lines = ["if TYPE_CHECKING"]
