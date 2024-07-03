@@ -3,21 +3,6 @@ from flask import Flask
 __version__ = "0.1.0"
 
 
-def init_app_db(app_inst, db):
-    from app.data_helper import DataInitializer
-    from app.models import AppRegistryModel
-
-    with app_inst.app_context():
-        db.create_all()
-
-        if db.session.execute(
-                db.select(AppRegistryModel).filter_by(key='data_inited')
-        ).scalar_one_or_none() is None:
-            DataInitializer(db.engine).run()
-            db.session.add(AppRegistryModel(key='data_inited', value='true'))
-            db.session.commit()
-
-
 def create_app(test_config=None):
     app = Flask(__name__)
 
@@ -34,14 +19,22 @@ def create_app(test_config=None):
     ext.api.init_app(app)
     ext.jwt.init_app(app)
 
-    # Create the database tables
-    init_app_db(app, ext.db)
+    # Register the API routes
+    from app.routes import register_blueprints
+    register_blueprints(ext.api)
 
-    # Register the blueprints
-    from app.routes import hello_bp, dataset_bp, auth_bp, user_bp
-    ext.api.register_blueprint(hello_bp, url_prefix='/api/v1')
-    ext.api.register_blueprint(dataset_bp, url_prefix='/api/v1/dataset')
-    ext.api.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
-    ext.api.register_blueprint(user_bp, url_prefix='/api/v1/user')
+    # Create the database tables
+    with app.app_context():
+        ext.db.create_all()
+
+        from app.data_helper import DataInitializer
+        from app.models import AppRegistryModel
+
+        if ext.db.session.execute(
+                ext.db.select(AppRegistryModel).filter_by(key='data_inited')
+        ).scalar_one_or_none() is None:
+            DataInitializer(ext.db.engine).run()
+            ext.db.session.add(AppRegistryModel(key='data_inited', value='true'))
+            ext.db.session.commit()
 
     return app
