@@ -9,6 +9,5 @@ from app.extensions import db
 class AppRegistryModel(db.Model):
     __tablename__ = 'app_registry'
 
-    sid: Mapped[int] = mapped_column(primary_key=True)
-    key: Mapped[str]
+    key: Mapped[str] = mapped_column(primary_key=True)
     value: Mapped[Optional[str]]
